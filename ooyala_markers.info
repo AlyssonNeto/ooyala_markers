@@ -1,0 +1,5 @@
+name = Ooyala
+description = Allows adding of chapter markers for Ooyala videos.
+dependencies[] = ooyala
+package = CCK
+core = 6.x
