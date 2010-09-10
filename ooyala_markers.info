@@ -1,4 +1,4 @@
-name = Ooyala
+name = Ooyala Markers
 description = Allows adding of chapter markers for Ooyala videos.
 dependencies[] = ooyala
 package = CCK
