@@ -1,13 +1,13 @@
 // $Id:$
-
 Drupal.behaviors.ooyalaMarkersJumpToAttach = function(context) {
 
   // Find all the chapter marker links.
   $('a.ooyala-markers-marker').click(function() {
     var href = $(this).attr('href');
-    var time = parseInt(href.slice(href.indexOf('#') + 1));
+    var fragment = href.slice(href.indexOf('#') + 1).split(':');
 
-    Drupal.ooyalaMarkersJumpTo(time);
+    player = document.getElementById(fragment[0] + '_ooyala_player');
+    Drupal.ooyalaMarkersJumpTo(player, fragment[1]);
 
     // Set the browser's URL so people can link directly to this chapter.
     window.location = href;
@@ -15,26 +15,28 @@ Drupal.behaviors.ooyalaMarkersJumpToAttach = function(context) {
   });
 }
 
-Drupal.ooyalaMarkersJumpTo = function(time) {
+Drupal.ooyalaMarkersJumpTo = function(player, time) {
   // Jump the player to the appropriate time.
   // The time variable is converted to seconds here. Ooyala API claims that
   // it has millisecond accuracy so we denote times in milliseconds, however
   // the setPlayHeadTime method takes the number of seconds as an argument.
-  document.getElementById('ooyala_player').setPlayheadTime(time/1000).playMovie();
+  player.setPlayheadTime(time/1000);
+  player.playMovie();
 }
 
-// Event callback function recieves events from Ooyala API.
-function receiveOoyalaEvent(playerId, eventName, p) {
+Drupal.ooyala = Drupal.ooyala || {'listeners': {}};
+
+Drupal.ooyala.listeners.ooyalaMarkers = function(player, eventName, p) {
   switch(eventName) {
     case 'apiReady':
       // If there is a #time in the current href jump to that point in the
       // video.
       var href = window.location.href;
-      var time = parseInt(href.slice(href.indexOf('#') + 1));
-      if (time) {
-        Drupal.ooyalaMarkersJumpTo(time);
+      var fragment = href.slice(href.indexOf('#') + 1).split(':');
+      if (fragment[0] && fragment[1]) {
+        Drupal.ooyalaMarkersJumpTo(player, fragment[1]);
       }
     break;
   }
   return;
-}
+};

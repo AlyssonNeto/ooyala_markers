@@ -88,12 +88,19 @@ function ooyala_markers_widget_settings($op, $widget) {
   switch ($op) {
     case 'form':
       $form = array();
+      $type = str_replace('-', '_', arg(3));
+      $fields = content_fields();
+      $options = array();
+      foreach ($fields as $field) {
+        if ($field['type'] == 'ooyala' && $field['type_name'] == $type) {
+          $options[$field['field_name']] = t('@label (@field)', array('@label' => $field['widget']['label'], '@field' => $field['field_name']));
+        }
+      }
       $form['ooyala_video_field'] = array(
         '#type' => 'select',
         '#title' => t('Ooyala video field'),
-        '#multiple' => TRUE,
         '#description' => t('The Ooyala video field the chapter markers should apply to.'),
-        '#options' => array('one', 'two'),
+        '#options' => $options,
         '#default_value' => -1,
       );
       return $form;
@@ -206,13 +213,18 @@ function theme_ooyala_marker($element) {
 function theme_ooyala_markers_formatter_default($element) {
   static $ooyala_markers_js_added;
 
+  $field = content_fields($element['#field_name'], $element['#type_name']);
+  $video_field = $field['widget']['ooyala_video_field'];
+
   if (!isset($ooyala_markers_js_added)) {
     drupal_add_js(drupal_get_path('module', 'ooyala_markers') . '/ooyala_markers.js');
     $ooyala_markers_js_added = TRUE;
   }
 
-  //dsm($element);
+  // Generate a #<video_player_id>:<time> fragment.
   $time = explode(':', $element['#item']['time']);
   $time_in_milliseconds = ($time[0] * 3600000) + ($time[1] * 60000) + ($time[2] * 1000);
-  return l($element['#item']['title'], 'node/' . $element['#node']->nid, array('absolute' => TRUE, 'fragment' => $time_in_milliseconds, 'attributes' => array('class' => 'ooyala-markers-marker')));
+  $fragment = $field['widget']['ooyala_video_field'] . ':' . $time_in_milliseconds;
+
+  return l($element['#item']['title'], 'node/' . $element['#node']->nid, array('absolute' => TRUE, 'fragment' => $fragment, 'attributes' => array('class' => 'ooyala-markers-marker')));
 }
