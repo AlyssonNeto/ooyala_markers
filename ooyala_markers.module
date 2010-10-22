@@ -213,6 +213,10 @@ function theme_ooyala_marker($element) {
 function theme_ooyala_markers_formatter_default($element) {
   static $ooyala_markers_js_added;
 
+  if (empty($element['#item']['title']) || empty($element['#item']['time'])) {
+    return;
+  }
+
   $field = content_fields($element['#field_name'], $element['#type_name']);
   $video_field = $field['widget']['ooyala_video_field'];
 
