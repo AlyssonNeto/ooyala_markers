@@ -7,6 +7,11 @@ Drupal.behaviors.ooyalaMarkersJumpToAttach = function(context) {
     var fragment = href.slice(href.indexOf('#') + 1).split(':');
 
     player = document.getElementById(fragment[0] + '_ooyala_player');
+
+    if (!player) {
+      player = document.getElementById('ooyala_player');
+    }
+
     if (parseInt(fragment[1])) {
       Drupal.ooyalaMarkersJumpTo(player, fragment[1]);
     }
